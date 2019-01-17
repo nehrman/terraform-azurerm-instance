@@ -1,1 +1,1 @@
-# terraform-azure-instance
+# Terraform Module to  create instances on Azure
