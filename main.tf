@@ -1,39 +1,38 @@
 # Create Network Nic to use with VM
 resource "azurerm_network_interface" "vm" {
-  count                                    = "${var.tf_az_nb_instance}"
-  name                                     = "${var.tf_az_env}-${var.tf_az_prefix}-nic-${count.index}"
-  location                                 = "${var.tf_az_location}"
-  resource_group_name                      = "${var.tf_az_rg_name}"
-  network_security_group_id                = "${azurerm_network_security_group.vm.id}"
+  count                     = "${var.tf_az_nb_instance}"
+  name                      = "${var.tf_az_env}-${var.tf_az_prefix}-nic-${count.index}"
+  location                  = "${var.tf_az_location}"
+  resource_group_name       = "${var.tf_az_rg_name}"
+  network_security_group_id = "${azurerm_network_security_group.vm.id}"
 
   ip_configuration {
-    name                                     = "ipconf${count.index}"
-    subnet_id                                = "${var.tf_az_subnet_id}"
-    private_ip_address_allocation            = "dynamic"
-    load_balancer_backend_address_pools_ids  = "${var.tf_az_lb_bckpool_id}"
+    name                          = "ipconf${count.index}"
+    subnet_id                     = "${var.tf_az_subnet_id}"
+    private_ip_address_allocation = "dynamic"
   }
 
-  tags                                       = "${var.tf_az_tags}"
+  tags = "${var.tf_az_tags}"
 }
 
 # Create Security Group related to VMs
 resource "azurerm_network_security_group" "vm" {
-  name                  = "${var.tf_az_env}-${var.tf_az_prefix}-sg"
-  location              = "${var.tf_az_location}"
-  resource_group_name   = "${var.tf_az_rg_name}"
-  tags                  = "${var.tf_az_tags}"
+  name                = "${var.tf_az_env}-${var.tf_az_prefix}-sg"
+  location            = "${var.tf_az_location}"
+  resource_group_name = "${var.tf_az_rg_name}"
+  tags                = "${var.tf_az_tags}"
 
   security_rule {
-    name                          = "allow_remote_access_to_vm"
-    description                   = "Allow remote protocol in from all locations"
-    priority                      = 100
-    direction                     = "Inbound"
-    access                        = "Allow"
-    protocol                      = "Tcp"
-    source_port_range             = "*"
-    destination_port_range        = "80"
-    source_address_prefix         = "*"
-    destination_address_prefix    = "*"
+    name                       = "allow_remote_access_to_vm"
+    description                = "Allow remote protocol in from all locations"
+    priority                   = 100
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "80"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
   }
 }
 
@@ -49,13 +48,13 @@ resource "azurerm_availability_set" "vm" {
 
 # Create Azure Web Server Instances
 resource "azurerm_virtual_machine" "vm" {
-  count                  = "${var.tf_az_nb_instance}"
-  name                   = "${var.tf_az_env}-${var.tf_az_prefix}-vm-${count.index}"
-  location               = "${var.tf_az_location}"
-  resource_group_name    = "${var.tf_az_rg_name}"
-  network_interface_ids  = ["${element(azurerm_network_interface.vm.*.id, count.index)}"]
-  vm_size                = "${var.tf_az_instance_type}"
-  availability_set_id    = "${azurerm_availability_set.vm.id}"
+  count                 = "${var.tf_az_nb_instance}"
+  name                  = "${var.tf_az_env}-${var.tf_az_prefix}-vm-${count.index}"
+  location              = "${var.tf_az_location}"
+  resource_group_name   = "${var.tf_az_rg_name}"
+  network_interface_ids = ["${element(azurerm_network_interface.vm.*.id, count.index)}"]
+  vm_size               = "${var.tf_az_instance_type}"
+  availability_set_id   = "${azurerm_availability_set.vm.id}"
 
   delete_os_disk_on_termination = true
 
@@ -109,4 +108,11 @@ resource "azurerm_virtual_machine_extension" "test" {
 SETTINGS
 
   tags = "${var.tf_az_tags}"
+}
+
+resource "azurerm_network_interface_backend_address_pool_association" "vm" {
+  count                     = "${var.tf_az_nb_instance}"
+  network_interface_id      = "${element(azurerm_network_interface.vm.*.id, count.index)}"
+  ip_configuration_name     = "ipconf${count.index}"
+  backend_address_pools_ids = "${var.tf_az_lb_bckpool_id}"
 }
