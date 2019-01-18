@@ -8,7 +8,7 @@ resource "azurerm_network_interface" "vm" {
 
   ip_configuration {
     name                          = "ipconf${count.index}"
-    subnet_id                     = "${var.tf_az_subnet_id[0]}"
+    subnet_id                     = "${element(var.tf_az_subnet_id, [0])}"
     private_ip_address_allocation = "dynamic"
   }
 
