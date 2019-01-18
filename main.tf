@@ -114,5 +114,5 @@ resource "azurerm_network_interface_backend_address_pool_association" "vm" {
   count                     = "${var.tf_az_nb_instance}"
   network_interface_id      = "${element(azurerm_network_interface.vm.*.id, count.index)}"
   ip_configuration_name     = "ipconf${count.index}"
-  backend_address_pools_id  = "${var.tf_az_lb_bckpool_id}"
+  backend_address_pool_id  = "${var.tf_az_lb_bckpool_id}"
 }
