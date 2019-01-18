@@ -30,8 +30,6 @@ variable "tf_az_location" {
 
 variable "tf_az_subnet_id" {
   description = "Define Subnet that will be used for NIC configuration"
-  type = "list"
-  default = []
 }
 
 variable "tf_az_net_name" {
