@@ -47,7 +47,6 @@ variable "tf_az_lb_conf" {
 }
 
 variable "tf_az_lb_bckpool_id" {
-  type        = "list"
   description = "Define Id of backend pool to connect the virtual network interface too."
-  default     = []
+  default     = ""
 }
