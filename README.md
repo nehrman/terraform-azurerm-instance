@@ -17,44 +17,45 @@ If you are using Terraform 0.11 you can use versions `v1.*`.
 VM Creation example: 
 
 ```hcl
-variable "tf_az_net_name" {
-  default = "demo-net"
+data "terraform_remote_state" "rg" {
+  backend = "remote"
+
+  config = {
+    organization = "<ORG_NAME>"
+
+    workspaces = {
+      name = "<WORKSPACE_NAME>"
+    }
+  }
 }
 
-variable "tf_az_rg_name" {
-  default = "my-tf-resourcegroup"
-}
+data "terraform_remote_state" "lb" {
+  backend = "remote"
 
-data "azurerm_subnet" "subnet" {
-  name = "subnet1"
-  virtual_network_name = "${var.tf_az_net_name}"
-  resource_group_name  = "${var.tf_az_rg_name}"
-}
+  config = {
+    organization = "<ORG_NAME>"
 
-data "azurerm_lb" "lb" {
-  name                = "example-lb"
-  resource_group_name = "${var.tf_az_rg_name}"
-}
-
-data "azurerm_lb_backend_address_pool" "lb" {
-  name            = "demo"
-  loadbalancer_id = "${data.azurerm_lb.lb.id}"
+    workspaces = {
+      name = "<WORKSPACE_NAME>"
+    }
+  }
 }
 
 module "instance" {
-  source              = "github.com/nehrman/terraform-azurerm-instance?ref=v1.0.12"
+  source              = "app.terraform.io/<ORG_NAME>/instance/azurerm"
+  version             = "1.0.0"
   tf_az_name          = "demo"
   tf_az_env           = "dev"
   tf_az_location      = "westeurope"
   tf_az_nb_instance   = "2"
   tf_az_prefix        = "web"
   tf_az_instance_type = "Standard_DS1_V2"
-  tf_az_subnet_id     = "${data.azurerm_subnet.subnet.id}"
-  tf_az_net_name      = "${var.tf_az_net_name}"
-  tf_az_rg_name       = "${var.tf_az_rg_name }"
-  tf_az_lb_bckpool_id = "${data.azurerm_lb_backend_address_pool.lb.id}"
+  tf_az_subnet_id     = "${data.terraform_remote_state.rg.outputs.subnets_id[0]}"
+  tf_az_net_name      = "${data.terraform_remote_state.rg.outputs.virtual_network_name}"
+  tf_az_rg_name       = "${data.terraform_remote_state.rg.outputs.resource_group_name}"
+  tf_az_lb_bckpool_id = "${data.terraform_remote_state.lb.outputs.load_balancer_backend_pool_id}"
 
-  tf_az_tags          = ["env":"dev","owner":"me"]
+  tf_az_tags          = {"env":"dev","owner":"me"}
 }
 ```
 
