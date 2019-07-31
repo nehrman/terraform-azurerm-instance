@@ -63,6 +63,3 @@ module "instance" {
 ## Authors
 
 * **Nicolas Ehrman** - *Initial work* - [Hashicorp](https://www.hashicorp.com)
-
-
-
