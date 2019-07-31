@@ -54,7 +54,7 @@ resource "azurerm_virtual_machine" "vm" {
   resource_group_name   = "${var.tf_az_rg_name}"
   network_interface_ids = ["${element(azurerm_network_interface.vm.*.id, count.index)}"]
   vm_size               = "${var.tf_az_instance_type}"
-  availability_set_id   = "${azurerm_availability_set.vm.*.id}"
+  availability_set_id   = "${azurerm_availability_set.vm[0].id}"
 
   delete_os_disk_on_termination = true
 
