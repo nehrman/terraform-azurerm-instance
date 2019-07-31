@@ -37,7 +37,7 @@ resource "azurerm_network_security_group" "vm" {
 }
 
 resource "azurerm_availability_set" "vm" {
-  count                        = "${var.tf_az_lb_conf}"
+  count                        = "${var.tf_az_lb_conf == true ? 1 : 0}"
   name                         = "${var.tf_az_env}-${var.tf_az_prefix}-avset"
   location                     = "${var.tf_az_location}"
   resource_group_name          = "${var.tf_az_rg_name}"
@@ -54,7 +54,7 @@ resource "azurerm_virtual_machine" "vm" {
   resource_group_name   = "${var.tf_az_rg_name}"
   network_interface_ids = ["${element(azurerm_network_interface.vm.*.id, count.index)}"]
   vm_size               = "${var.tf_az_instance_type}"
-  availability_set_id   = "${azurerm_availability_set.vm.id}"
+  availability_set_id   = "${azurerm_availability_set.vm[0].id}"
 
   delete_os_disk_on_termination = true
 
