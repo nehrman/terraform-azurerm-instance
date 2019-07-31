@@ -20,7 +20,7 @@ VM Creation example:
 
 ```hcl
 variable "tf_az_net_name" {
-  default = "subnet1"
+  default = "demo-net"
 }
 
 variable "tf_az_rg_name" {
