@@ -16,8 +16,6 @@ If you are using Terraform 0.11 you can use versions `v1.*`.
 
 VM Creation example: 
 
-### VM without Data Disk 
-
 ```hcl
 variable "tf_az_net_name" {
   default = "demo-net"
