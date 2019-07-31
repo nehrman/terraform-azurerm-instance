@@ -37,7 +37,7 @@ resource "azurerm_network_security_group" "vm" {
 }
 
 resource "azurerm_availability_set" "vm" {
-  count                        = "${var.tf_az_lb_conf}"
+  count                        = "${var.tf_az_lb_conf == true ? 1 : 0}"
   name                         = "${var.tf_az_env}-${var.tf_az_prefix}-avset"
   location                     = "${var.tf_az_location}"
   resource_group_name          = "${var.tf_az_rg_name}"
