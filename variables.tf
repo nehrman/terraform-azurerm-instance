@@ -1,9 +1,11 @@
 variable "tf_az_name" {
   description = "Name used to create all resources except subnets"
+  default     = "test"
 }
 
 variable "tf_az_env" {
   description = "Environnement where the resources will be created"
+  default     = "dev"
 }
 
 variable "tf_az_rg_name" {
@@ -12,7 +14,7 @@ variable "tf_az_rg_name" {
 
 variable "tf_az_tags" {
   description = "The tags to associate with your network and subnets."
-  type        = "map"
+  type        = map
 }
 
 variable "tf_az_nb_instance" {

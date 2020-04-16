@@ -1,26 +1,26 @@
 # Create Network Nic to use with VM
 resource "azurerm_network_interface" "vm" {
-  count                     = "${var.tf_az_nb_instance}"
+  count                     = var.tf_az_nb_instance
   name                      = "${var.tf_az_env}-${var.tf_az_prefix}-nic-${count.index}"
-  location                  = "${var.tf_az_location}"
-  resource_group_name       = "${var.tf_az_rg_name}"
-  network_security_group_id = "${azurerm_network_security_group.vm.id}"
+  location                  = var.tf_az_location
+  resource_group_name       = var.tf_az_rg_name
+#  network_security_group_id = azurerm_network_security_group.vm.id
 
   ip_configuration {
     name                          = "ipconf${count.index}"
-    subnet_id                     = "${var.tf_az_subnet_id}"
+    subnet_id                     = var.tf_az_subnet_id
     private_ip_address_allocation = "dynamic"
   }
 
-  tags = "${var.tf_az_tags}"
+  tags = var.tf_az_tags
 }
 
 # Create Security Group related to VMs
 resource "azurerm_network_security_group" "vm" {
   name                = "${var.tf_az_env}-${var.tf_az_prefix}-sg"
-  location            = "${var.tf_az_location}"
-  resource_group_name = "${var.tf_az_rg_name}"
-  tags                = "${var.tf_az_tags}"
+  location            = var.tf_az_location
+  resource_group_name = var.tf_az_rg_name
+  tags                = var.tf_az_tags
 
   security_rule {
     name                       = "allow_remote_access_to_vm"
@@ -37,10 +37,10 @@ resource "azurerm_network_security_group" "vm" {
 }
 
 resource "azurerm_availability_set" "vm" {
-  count                        = "${var.tf_az_lb_conf == true ? 1 : 0}"
+  count                        = var.tf_az_lb_conf == true ? 1 : 0
   name                         = "${var.tf_az_env}-${var.tf_az_prefix}-avset"
-  location                     = "${var.tf_az_location}"
-  resource_group_name          = "${var.tf_az_rg_name}"
+  location                     = var.tf_az_location
+  resource_group_name          = var.tf_az_rg_name
   platform_fault_domain_count  = 2
   platform_update_domain_count = 2
   managed                      = true
@@ -48,13 +48,13 @@ resource "azurerm_availability_set" "vm" {
 
 # Create Azure Web Server Instances
 resource "azurerm_virtual_machine" "vm" {
-  count                 = "${var.tf_az_nb_instance}"
+  count                 = var.tf_az_nb_instance
   name                  = "${var.tf_az_env}-${var.tf_az_prefix}-vm-${count.index}"
-  location              = "${var.tf_az_location}"
-  resource_group_name   = "${var.tf_az_rg_name}"
-  network_interface_ids = ["${element(azurerm_network_interface.vm.*.id, count.index)}"]
-  vm_size               = "${var.tf_az_instance_type}"
-  availability_set_id   = "${azurerm_availability_set.vm[0].id}"
+  location              = var.tf_az_location
+  resource_group_name   = var.tf_az_rg_name
+  network_interface_ids = [element(azurerm_network_interface.vm.*.id, count.index)]
+  vm_size               = var.tf_az_instance_type
+  availability_set_id   = azurerm_availability_set.vm[0].id
 
   delete_os_disk_on_termination = true
 
@@ -82,7 +82,7 @@ resource "azurerm_virtual_machine" "vm" {
     disable_password_authentication = false
   }
 
-  tags = "${var.tf_az_tags}"
+  tags = var.tf_az_tags
 
   lifecycle {
     create_before_destroy = true
@@ -90,15 +90,15 @@ resource "azurerm_virtual_machine" "vm" {
 }
 
 resource "azurerm_virtual_machine_extension" "test" {
-  count                = "${var.tf_az_nb_instance}"
+  count                = var.tf_az_nb_instance
   name                 = "webserver"
-  location             = "${var.tf_az_location}"
-  resource_group_name  = "${var.tf_az_rg_name}"
-  virtual_machine_name = "${var.tf_az_env}-${var.tf_az_prefix}-vm-${count.index}"
+#  location             = var.tf_az_location
+#  resource_group_name  = var.tf_az_rg_name
+  virtual_machine_id   = element(azurerm_virtual_machine.vm.*.id, count.index)
   publisher            = "Microsoft.Azure.Extensions"
   type                 = "CustomScript"
   type_handler_version = "2.0"
-  depends_on           = ["azurerm_virtual_machine.vm"]
+  depends_on           = [azurerm_virtual_machine.vm]
 
   settings = <<SETTINGS
     {
@@ -107,12 +107,12 @@ resource "azurerm_virtual_machine_extension" "test" {
     }
 SETTINGS
 
-  tags = "${var.tf_az_tags}"
+  tags = var.tf_az_tags
 }
 
 resource "azurerm_network_interface_backend_address_pool_association" "vm" {
-  count                     = "${var.tf_az_nb_instance}"
-  network_interface_id      = "${element(azurerm_network_interface.vm.*.id, count.index)}"
-  ip_configuration_name     = "ipconf${count.index}"
-  backend_address_pool_id  = "${var.tf_az_lb_bckpool_id}"
+  count                   = var.tf_az_nb_instance
+  network_interface_id    = element(azurerm_network_interface.vm.*.id, count.index)
+  ip_configuration_name   = "ipconf${count.index}"
+  backend_address_pool_id = var.tf_az_lb_bckpool_id
 }
