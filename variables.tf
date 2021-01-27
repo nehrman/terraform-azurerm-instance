@@ -14,7 +14,7 @@ variable "tf_az_rg_name" {
 
 variable "tf_az_tags" {
   description = "The tags to associate with your network and subnets."
-  type        = map
+  type        = map(string)
 }
 
 variable "tf_az_nb_instance" {
