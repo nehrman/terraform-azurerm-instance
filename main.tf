@@ -9,7 +9,7 @@ resource "azurerm_network_interface" "vm" {
   ip_configuration {
     name                          = "ipconf${count.index}"
     subnet_id                     = var.tf_az_subnet_id
-    private_ip_address_allocation = "dynamic"
+    private_ip_address_allocation = "Dynamic"
   }
 
   tags = var.tf_az_tags
